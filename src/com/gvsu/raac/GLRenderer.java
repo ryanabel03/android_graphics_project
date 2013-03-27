@@ -1,16 +1,16 @@
 package com.gvsu.raac;
 
 
-import javax.microedition.khronos.egl.EGLConfig;
-import javax.microedition.khronos.opengles.GL10;
-import javax.microedition.khronos.opengles.GL11;
-
 import android.content.Context;
 import android.opengl.GLSurfaceView.Renderer;
 import android.opengl.GLU;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.Surface;
+
+import javax.microedition.khronos.egl.EGLConfig;
+import javax.microedition.khronos.opengles.GL10;
+import javax.microedition.khronos.opengles.GL11;
 
 public class GLRenderer implements Renderer {
     private final String TAG = getClass().getName();
@@ -35,11 +35,15 @@ public class GLRenderer implements Renderer {
     private final static float materialSpe[] = {0.7f, 1.0f, 0.7f, 1f};
     private boolean anim;
     private Pin pin;
-    private Wheel wheel;
     private Texture rubber;
     private Texture alley;
     private Hand hand;
     private Texture skin;
+
+    private float[] randomX, randomY;
+    private int numPins = 4;
+    private Texture metal;
+    private Texture ball;
 
     public GLRenderer(Context parent, TransformationParams p)
     {
@@ -48,7 +52,6 @@ public class GLRenderer implements Renderer {
         box = new Box(20, 20);
         sphere = new MeshObject(mCtx, "sphere.off");
         pin = new Pin(mCtx);
-        wheel = new Wheel(mCtx);
         hand = new Hand(mCtx);
         sphRotation = new float[16];
         /* initialize with identity matrix */
@@ -110,7 +113,7 @@ public class GLRenderer implements Renderer {
 			gl.glLoadIdentity();
 			gl.glTranslatef(-param.texTransX / param.texScale, param.texTransY
 					/ param.texScale, 0);
-			gl.glScalef(1 / param.texScale, -1 / param.texScale, 1f);
+			gl.glScalef(1 / param.texScale, -1f / param.texScale, 1f);
 			box.draw();
 		}
 		gl.glPopMatrix();
@@ -122,11 +125,11 @@ public class GLRenderer implements Renderer {
         /* The Box class does not define color array, by disabling
          * vertex color, the default color will be used to render it */
         
-        logo.bind();
+        ball.bind();
         gl.glDisableClientState(GL10.GL_COLOR_ARRAY);
 		
         gl.glColor4f(1f, 1f, 1f, 1f);
-//        logo.bind();
+
     	/* limit the rolling motion when the ball hits the border */
         if (isLandscape) {
             if (param.sphTrX < -3 + SPH_SIZE) {
@@ -204,21 +207,7 @@ public class GLRenderer implements Renderer {
         gl.glScalef(SPH_SIZE, SPH_SIZE, SPH_SIZE);
         sphere.draw();
         gl.glPopMatrix();
-        logo.unbind();
-
-        gl.glPushMatrix();
-        gl.glRotatef(90, 1, 0, 0);
-        gl.glTranslatef(0, 1f, 0);
-        pin.draw();
-        gl.glPopMatrix();
-
-        rubber.bind();
-        gl.glPushMatrix();
-        gl.glTranslatef(1f, 0f, 1f);
-        gl.glScalef (3f, 7f, 7f);
-        wheel.draw();
-        gl.glPopMatrix();
-        rubber.unbind();
+        ball.unbind();
 
         skin.bind();
         gl.glPushMatrix();
@@ -230,7 +219,16 @@ public class GLRenderer implements Renderer {
         gl.glPopMatrix();
         skin.unbind();
 
-
+        metal.bind();
+        gl.glRotatef(90, 1, 0, 0);
+        gl.glTranslatef(0, 1f, 0);
+        for(int i = 0; i < 4; i++) {
+            gl.glPushMatrix();
+            gl.glTranslatef(randomX[i]-2, 0, randomY[i]-2);
+            pin.draw();
+            gl.glPopMatrix();
+        }
+        metal.unbind();
     }
 
     @Override
@@ -286,6 +284,16 @@ public class GLRenderer implements Renderer {
         rubber = new Texture (mCtx, R.drawable.rubber);
         alley = new Texture(mCtx, R.drawable.alley);
         skin = new Texture(mCtx, R.drawable.hand);
+        metal = new Texture(mCtx, R.drawable.metal);
+        ball = new Texture(mCtx, R.drawable.ball);
+
+        randomX = new float[numPins];
+        randomY = new float[numPins];
+
+        for(int i = 0; i < numPins; i++)
+            randomX[i] = (float)Math.random() * 4;
+        for(int i = 0; i < numPins; i++)
+            randomY[i] = (float)Math.random() * 4;
     }
 
  

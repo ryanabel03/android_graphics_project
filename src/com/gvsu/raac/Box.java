@@ -1,12 +1,12 @@
 package com.gvsu.raac;
 
 import javax.microedition.khronos.opengles.GL10;
-import static android.opengl.GLES10.*;
-
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 import java.nio.ShortBuffer;
+
+import static android.opengl.GLES10.*;
 
 public class Box implements Drawable {
     private FloatBuffer mVertex, mNormal, mTex;
