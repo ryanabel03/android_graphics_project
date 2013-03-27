@@ -39,14 +39,21 @@ public class GLRenderer implements Renderer {
     private Texture alley;
     private Hand hand;
     private Texture skin;
+    private float handPosY = 0f;
+    private float handAngle = 0;
+    private TransformationParams handPars;
+    private static final float MAX_HAND_POS = .5f;
+    private boolean movingHandForward;
+    private static final float MIN_HAND_POS = -.1f;
 
     private float[] randomX, randomY;
     private int numPins = 4;
     private Texture metal;
     private Texture ball;
 
-    public GLRenderer(Context parent, TransformationParams p)
+    public GLRenderer(Context parent, TransformationParams p, TransformationParams handPars)
     {
+        movingHandForward = true;
         mCtx = parent;
         anim = true;
         box = new Box(20, 20);
@@ -64,6 +71,7 @@ public class GLRenderer implements Renderer {
         param.texScale = 1.0f;
         param.texTransX = param.texTransY = 0;
         lighting = true;
+        this.handPars = handPars;
     }
     
     @Override
@@ -215,6 +223,25 @@ public class GLRenderer implements Renderer {
         gl.glRotatef(-90f, 0f, 0f, 1f);
         gl.glRotatef(180, 1f, 0f, 0f);
         gl.glScalef (4f, 4f, 4f);
+
+        if(movingHandForward) {
+            if(handPosY <= MAX_HAND_POS) {
+                handPosY += .005f;
+                handAngle -= .375f;
+                gl.glTranslatef( 0, handPosY, 0);
+                gl.glRotatef(handAngle, 1, 0, 0);
+            } else {
+                movingHandForward = false;
+            }
+        } else if (handPosY >= MIN_HAND_POS) {
+            handPosY -= .005f;
+            handAngle += .375f;
+            gl.glTranslatef(0, handPosY, 0);
+            gl.glRotatef(handAngle, 1, 0, 0);
+        } else {
+            movingHandForward = true;
+        }
+
         hand.draw();
         gl.glPopMatrix();
         skin.unbind();

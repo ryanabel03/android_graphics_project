@@ -50,7 +50,8 @@ public class GraphicsActivity extends Activity {
     private TransformationParams par;
     private GLRenderer render;
     private boolean useSensor;
-    
+    private TransformationParams handPars;
+
     /** Called when the activity is first created. */
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -72,6 +73,16 @@ public class GraphicsActivity extends Activity {
         par.litePos[2] = 3f;
         par.droid_x = 2.0f;
         par.droid_y = 1.0f;
+
+        handPars = new TransformationParams();
+        handPars.eyeX = 3f;
+        handPars.eyeY = -4f;
+        handPars.eyeZ = 3f;
+        handPars.litePos[0] = 0f;
+        handPars.litePos[1] = 0f;
+        handPars.litePos[2] = 3f;
+        handPars.droid_x = 2.0f;
+        handPars.droid_y = 1.0f;
         /* no additional layout, GLSurface will be the only view */
         mView = new GLView(this);
         mView.setRenderMode(GLSurfaceView.RENDERMODE_CONTINUOUSLY);
@@ -162,7 +173,7 @@ public class GraphicsActivity extends Activity {
         
         public GLView(Context context) {
             super(context);
-            render = new GLRenderer(context, par);
+            render = new GLRenderer(context, par, handPars);
             setRenderer(render);
             setRenderMode(RENDERMODE_CONTINUOUSLY);
         }
