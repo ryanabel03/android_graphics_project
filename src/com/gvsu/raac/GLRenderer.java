@@ -17,7 +17,7 @@ public class GLRenderer implements Renderer {
     private final float SPH_SIZE = 0.5f; /* radius */
 
     private Box box;
-    Drawable sphere, droid;
+    Drawable sphere;
     private Texture logo, wood;
     private Context mCtx;
     private boolean isLandscape, isPinching, lighting;
@@ -34,14 +34,22 @@ public class GLRenderer implements Renderer {
     private final static float materialAmb[] = {0.3f, 0.3f, 0.3f, 1f};
     private final static float materialSpe[] = {0.7f, 1.0f, 0.7f, 1f};
     private boolean anim;
-    
+    private Pin pin;
+    private Wheel wheel;
+    private Texture rubber;
+    private Texture alley;
+    private Hand hand;
+    private Texture skin;
+
     public GLRenderer(Context parent, TransformationParams p)
     {
         mCtx = parent;
         anim = true;
         box = new Box(20, 20);
         sphere = new MeshObject(mCtx, "sphere.off");
-        droid = new Droid(mCtx);
+        pin = new Pin(mCtx);
+        wheel = new Wheel(mCtx);
+        hand = new Hand(mCtx);
         sphRotation = new float[16];
         /* initialize with identity matrix */
         for (int k = 0; k < 16; k += 5)
@@ -88,7 +96,7 @@ public class GLRenderer implements Renderer {
         	gl.glEnable(GL10.GL_LIGHTING);
         else
         	gl.glDisable (GL10.GL_LIGHTING);
-        wood.bind();
+        alley.bind();
         gl.glDisableClientState(GL10.GL_COLOR_ARRAY);
 		gl.glPushMatrix();
 		gl.glScalef (6f, 4f, 1f);
@@ -110,19 +118,12 @@ public class GLRenderer implements Renderer {
 		gl.glMatrixMode(GL10.GL_MODELVIEW);
 		gl.glPopMatrix();
         
-		wood.unbind();
+		alley.unbind();
         /* The Box class does not define color array, by disabling
          * vertex color, the default color will be used to render it */
         
         logo.bind();
         gl.glDisableClientState(GL10.GL_COLOR_ARRAY);
-		gl.glPushMatrix();
-		/* Android green */
-		gl.glColor4f(0xA4/255f, 0xC6/255f, 0x39/255f, 1f);
-		gl.glTranslatef(param.droid_x, param.droid_y, 0);
-		gl.glRotatef(-35, 0, 0, 1);
-		droid.draw(anim);
-		gl.glPopMatrix();
 		
         gl.glColor4f(1f, 1f, 1f, 1f);
 //        logo.bind();
@@ -198,11 +199,38 @@ public class GLRenderer implements Renderer {
         }
 
         gl.glPushMatrix();
-		gl.glTranslatef(param.sphTrX, param.sphTrY, 0.5f);
-		gl.glMultMatrixf(sphRotation, 0);
-		gl.glScalef(SPH_SIZE, SPH_SIZE, SPH_SIZE);
-		sphere.draw();
+        gl.glTranslatef(param.sphTrX, param.sphTrY, 0.5f);
+        gl.glMultMatrixf(sphRotation, 0);
+        gl.glScalef(SPH_SIZE, SPH_SIZE, SPH_SIZE);
+        sphere.draw();
         gl.glPopMatrix();
+        logo.unbind();
+
+        gl.glPushMatrix();
+        gl.glRotatef(90, 1, 0, 0);
+        gl.glTranslatef(0, 1f, 0);
+        pin.draw();
+        gl.glPopMatrix();
+
+        rubber.bind();
+        gl.glPushMatrix();
+        gl.glTranslatef(1f, 0f, 1f);
+        gl.glScalef (3f, 7f, 7f);
+        wheel.draw();
+        gl.glPopMatrix();
+        rubber.unbind();
+
+        skin.bind();
+        gl.glPushMatrix();
+        gl.glTranslatef(-3f, 0f, 1.5f);
+        gl.glRotatef(-90f, 0f, 0f, 1f);
+        gl.glRotatef(180, 1f, 0f, 0f);
+        gl.glScalef (4f, 4f, 4f);
+        hand.draw();
+        gl.glPopMatrix();
+        skin.unbind();
+
+
     }
 
     @Override
@@ -255,7 +283,11 @@ public class GLRenderer implements Renderer {
         /* can't do this in the constructor */
         logo = new Texture (mCtx, R.drawable.cis_logo);
         wood = new Texture (mCtx, R.drawable.wood);
+        rubber = new Texture (mCtx, R.drawable.rubber);
+        alley = new Texture(mCtx, R.drawable.alley);
+        skin = new Texture(mCtx, R.drawable.hand);
     }
+
  
     public void doSwipe(MotionEvent ev, int which)
     {
