@@ -1,7 +1,6 @@
 .classpath
 .project
 .settings/
-*.iml
 *.iws
 .DS_Store
 log/
