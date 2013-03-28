@@ -1,6 +1,5 @@
 package com.gvsu.raac;
 
-
 import android.content.Context;
 import android.opengl.GLSurfaceView.Renderer;
 import android.opengl.GLU;
@@ -18,7 +17,6 @@ public class GLRenderer implements Renderer {
 
     private Box box;
     Drawable sphere;
-    private Texture logo, wood;
     private Context mCtx;
     private boolean isLandscape, isPinching, lighting;
     private float[] sphRotation;
@@ -36,13 +34,10 @@ public class GLRenderer implements Renderer {
     private final static float materialSpe[] = {0.7f, 1.0f, 0.7f, 1f};
     private boolean anim;
     private Pin pin;
-    private Texture rubber;
     private Texture alley;
     private Hand hand;
     private Texture skin;
     private float handPosY = 0f;
-    private float handAngle = 0;
-    private TransformationParams handPars;
     private static final float MAX_HAND_POS = .5f;
     private boolean movingHandForward;
     private static final float MIN_HAND_POS = -.1f;
@@ -53,7 +48,7 @@ public class GLRenderer implements Renderer {
     private Texture metal;
     private Texture ball;
 
-    public GLRenderer(Context parent, TransformationParams p, TransformationParams handPars)
+    public GLRenderer(Context parent, TransformationParams p)
     {
         movingHandForward = true;
         mCtx = parent;
@@ -72,11 +67,9 @@ public class GLRenderer implements Renderer {
 
         /* initialize transformation variables */
         param = p;
-//        param.transX = param.transY = 0;
         param.texScale = 1.0f;
         param.texTransX = param.texTransY = 0;
         lighting = true;
-        this.handPars = handPars;
     }
     
     @Override
@@ -165,16 +158,10 @@ public class GLRenderer implements Renderer {
             	param.roll_x = 0;
             }
         }
-        Log.d(TAG, "Sphere (" + param.sphTrX + "," + param.sphTrY + ")  Droid ("
-                + param.droid_x + "," + param.droid_y + ")" +
-            " dx=" + Math.abs(param.sphTrX - param.droid_x) + " dy=" +
-                Math.abs(param.sphTrY - param.droid_y));
-        if (Math.abs(param.sphTrX - param.droid_x) < 1.2 &&
-                Math.abs(param.sphTrY - param.droid_y) < 1.2)
-        {
-            param.roll_x = param.roll_y = 0.0f;
-        }
-        
+        Log.d(TAG, "Sphere (" + param.sphTrX + "," + param.sphTrY + ") " +
+            " dx=" + Math.abs(param.sphTrX) + " dy=" +
+                Math.abs(param.sphTrY));
+
         /* (roll_x, roll_y) is the direction where the sphere is supposed to roll */
         double rollDist = Math.sqrt(param.roll_x * param.roll_x + 
         		param.roll_y * param.roll_y);
@@ -192,7 +179,7 @@ public class GLRenderer implements Renderer {
 			 */
 			gl.glLoadIdentity();
 			/* axis of rotation is perpendicular to the roll direction */
-			gl.glRotatef((float) rollAng, -param.roll_y / (float) rollDist,
+			gl.glRotatef((float) rollAng * 0.6f, -param.roll_y / (float) rollDist,
 					param.roll_x / (float) rollDist, 0);
 			gl.glMultMatrixf(sphRotation, 0);
 			((GL11) gl).glGetFloatv(GL11.GL_MODELVIEW_MATRIX, sphRotation, 0);
@@ -213,25 +200,20 @@ public class GLRenderer implements Renderer {
         if(movingHandForward) {
             if(handPosY <= MAX_HAND_POS) {
                 if(anim) {
-                    handPosY += .005f;
-                    //handAngle -= .375f;
-                    gl.glMultMatrixf(MatrixHelper.getTranslationMatrix(0, .005f, 0), 0);
+                    handPosY += .007f;
+                    gl.glMultMatrixf(MatrixHelper.getTranslationMatrix(0, .007f, 0), 0);
                     gl.glMultMatrixf(MatrixHelper.getRotationMatrix(-.375f, 1, 0, 0), 0);
                 }
-                /*gl.glTranslatef( 0, handPosY, 0);
-                gl.glRotatef(handAngle, 1, 0, 0);*/
+
             } else {
                 movingHandForward = false;
             }
         } else if (handPosY >= MIN_HAND_POS) {
             if(anim){
-                handPosY -= .005f;
-                //handAngle += .375f;
-                gl.glMultMatrixf(MatrixHelper.getTranslationMatrix(0, -.005f, 0), 0);
+                handPosY -= .007f;
+                gl.glMultMatrixf(MatrixHelper.getTranslationMatrix(0, -.007f, 0), 0);
                 gl.glMultMatrixf(MatrixHelper.getRotationMatrix(.375f, 1, 0, 0), 0);
             }
-            //gl.glTranslatef(0, handPosY, 0);
-            //gl.glRotatef(handAngle, 1, 0, 0);
         } else {
             movingHandForward = true;
         }
@@ -240,10 +222,10 @@ public class GLRenderer implements Renderer {
         gl.glPopMatrix();
 
         gl.glPushMatrix();
-        gl.glTranslatef(-3f, 0f, 2f);
+        gl.glTranslatef(-3f, 0f, 2.25f);
         gl.glRotatef(-90f, 0f, 0f, 1f);
         gl.glRotatef(180, 1f, 0f, 0f);
-        gl.glScalef (4f, 4f, 4f);
+        gl.glScalef (6f, 6f, 6f);
 
         gl.glMultMatrixf(handCF, 0);
         hand.draw();
@@ -269,8 +251,6 @@ public class GLRenderer implements Renderer {
     public void onSurfaceChanged(GL10 gl, int width, int height) {
         scrWidth = width;
         scrHeight = height;
-        // resize function
-//        Log.i(TAG, "onSurfaceChange() " + width + "x" + height);
         
         gl.glViewport (0, 0, width, height);
 
@@ -288,8 +268,6 @@ public class GLRenderer implements Renderer {
 
     @Override
     public void onSurfaceCreated(GL10 gl, EGLConfig config) {
-//        Log.i(TAG, "onSurfaceCreated() ");
-
         gl.glEnableClientState(GL10.GL_VERTEX_ARRAY);
         gl.glEnableClientState(GL10.GL_NORMAL_ARRAY);
         gl.glShadeModel(GL10.GL_SMOOTH);
@@ -313,9 +291,6 @@ public class GLRenderer implements Renderer {
         gl.glEnable(GL10.GL_CULL_FACE);
         gl.glEnable(GL10.GL_DEPTH_TEST);
         /* can't do this in the constructor */
-        logo = new Texture (mCtx, R.drawable.cis_logo);
-        wood = new Texture (mCtx, R.drawable.wood);
-        rubber = new Texture (mCtx, R.drawable.rubber);
         alley = new Texture(mCtx, R.drawable.alley);
         skin = new Texture(mCtx, R.drawable.hand);
         metal = new Texture(mCtx, R.drawable.metal);
@@ -329,17 +304,6 @@ public class GLRenderer implements Renderer {
 
         movePins();
     }
-
-    public void movePins() {
-        for(int i = 0; i < numPins; i++) {
-            randomX[i] = ((float)Math.random() * 4) - 2;
-            randomY[i] = ((float)Math.random() * 4) - 2;
-            randomXrot[i] = ((float)Math.random() * 200) - 100;
-            randomYrot[i] = ((float)Math.random() * 200) - 100;
-            randomZrot[i] = ((float)Math.random() * 200) - 100;
-        }
-    }
-
 
     public void doSwipe(MotionEvent ev, int which)
     {
@@ -386,7 +350,6 @@ public class GLRenderer implements Renderer {
     {
         /* two fingers are pressed */
         float dx, dy, currDist;
-//        StringBuilder sb = new StringBuilder();
         switch (ev.getAction() & MotionEvent.ACTION_MASK) {
         case MotionEvent.ACTION_POINTER_DOWN:
             switch (which) {
@@ -405,7 +368,6 @@ public class GLRenderer implements Renderer {
             break;
         case MotionEvent.ACTION_POINTER_UP:
             isPinching = false;
-//            sb.append("POINTER UP");
             break;
         case MotionEvent.ACTION_MOVE:
             float tx = (ev.getX(0) - prevX) / scrWidth;
@@ -434,18 +396,14 @@ public class GLRenderer implements Renderer {
             prevY = ev.getY(0);
             break;
         default:
-//            sb.append("OTHER EVENT: " + ev.getAction() + " ");
             break;
         }
-//        Log.d(TAG, sb.toString());
-    	
     }
 
     private long tstamp;
     
     void doTilt (float[] grav, long timestamp, int orient)
     {
-//    	Log.i(TAG, String.format("Gravity %3.0f %3.0f %3.0f", grav[0], grav[1], grav[2]));
         float len = grav[0] * grav[0] + grav[1] * grav[1];
         if (len >= 10.0) {
         	param.tiltZRot = (float) (Math.atan2(grav[1], grav[0]) * 180.0 / Math.PI);
@@ -502,14 +460,23 @@ public class GLRenderer implements Renderer {
     	
     }
 
-    void setLighting (boolean onOff)
+    public void setLighting (boolean onOff)
     {
     	lighting = onOff;
     }
     
-    void setAnimation (boolean flag)
+    public void setAnimation (boolean flag)
     {
         anim = flag;
     }
-}
 
+    public void movePins() {
+        for(int i = 0; i < numPins; i++) {
+            randomX[i] = ((float)Math.random() * 4) - 2;
+            randomY[i] = ((float)Math.random() * 4) - 2;
+            randomXrot[i] = ((float)Math.random() * 160) - 80;
+            randomYrot[i] = ((float)Math.random() * 160) - 80;
+            randomZrot[i] = ((float)Math.random() * 160) - 80;
+        }
+    }
+}
