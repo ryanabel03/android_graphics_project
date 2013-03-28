@@ -26,16 +26,8 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.opengl.GLSurfaceView;
 import android.os.Bundle;
-import android.view.Display;
-import android.view.MotionEvent;
-import android.view.View;
-import android.view.ViewGroup;
-import android.view.Window;
-import android.view.WindowManager;
-import android.widget.CompoundButton;
-import android.widget.RadioButton;
-import android.widget.RadioGroup;
-import android.widget.ToggleButton;
+import android.view.*;
+import android.widget.*;
 import android.widget.CompoundButton.OnCheckedChangeListener;
 
 
@@ -50,6 +42,7 @@ public class GraphicsActivity extends Activity {
     private GLRenderer render;
     private boolean useSensor;
     private TransformationParams handPars;
+    private Button movepins;
 
     /** Called when the activity is first created. */
     @Override
@@ -122,6 +115,15 @@ public class GraphicsActivity extends Activity {
                 render.setAnimation(isChecked);
             }
         });
+        
+        movepins = (Button)findViewById(R.id.bpins);
+        movepins.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                render.movePins();
+            }
+        });
+        
         /* we are going to replace the dummy view with our own GLView */
         View dummy = (View) findViewById(R.id.dummy);
         /* identify dummy's parent */

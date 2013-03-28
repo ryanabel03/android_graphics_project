@@ -39,6 +39,11 @@
             android:text="@string/movehand"
             android:textOff="@string/movehand"
             android:textOn="@string/movehand" />
+        <Button
+            android:id="@+id/bpins"
+            android:layout_width="80dp"
+            android:layout_height="wrap_content"
+            android:text="@string/movepins" />
         <ScrollView
             android:id="@+id/scrollView1"
             android:layout_width="wrap_content"
@@ -108,6 +113,5 @@
         android:layout_above="@id/message"
         android:layout_alignParentLeft="true"
         android:layout_alignParentTop="true"
-        android:layout_toLeftOf="@id/controlbox"
-        android:text="@string/hello" />
+        android:layout_toLeftOf="@id/controlbox" />
 </RelativeLayout>

@@ -48,6 +48,7 @@ public class GLRenderer implements Renderer {
     private static final float MIN_HAND_POS = -.1f;
 
     private float[] randomX, randomY;
+    private float[] randomXrot, randomYrot, randomZrot;
     private int numPins = 4;
     private Texture metal;
     private Texture ball;
@@ -239,7 +240,7 @@ public class GLRenderer implements Renderer {
         gl.glPopMatrix();
 
         gl.glPushMatrix();
-        gl.glTranslatef(-3f, 0f, 1.5f);
+        gl.glTranslatef(-3f, 0f, 2f);
         gl.glRotatef(-90f, 0f, 0f, 1f);
         gl.glRotatef(180, 1f, 0f, 0f);
         gl.glScalef (4f, 4f, 4f);
@@ -254,7 +255,10 @@ public class GLRenderer implements Renderer {
         gl.glTranslatef(0, 1f, 0);
         for(int i = 0; i < 4; i++) {
             gl.glPushMatrix();
-            gl.glTranslatef(randomX[i]-2, 0, randomY[i]-2);
+            gl.glTranslatef(randomX[i], 0, randomY[i]);
+            gl.glRotatef(randomXrot[i], 1, 0, 0);
+            gl.glRotatef(randomYrot[i], 0, 1, 0);
+            gl.glRotatef(randomZrot[i], 0, 0, 1);
             pin.draw();
             gl.glPopMatrix();
         }
@@ -319,14 +323,24 @@ public class GLRenderer implements Renderer {
 
         randomX = new float[numPins];
         randomY = new float[numPins];
+        randomXrot = new float[numPins];
+        randomYrot = new float[numPins];
+        randomZrot = new float[numPins];
 
-        for(int i = 0; i < numPins; i++)
-            randomX[i] = (float)Math.random() * 4;
-        for(int i = 0; i < numPins; i++)
-            randomY[i] = (float)Math.random() * 4;
+        movePins();
     }
 
- 
+    public void movePins() {
+        for(int i = 0; i < numPins; i++) {
+            randomX[i] = ((float)Math.random() * 4) - 2;
+            randomY[i] = ((float)Math.random() * 4) - 2;
+            randomXrot[i] = ((float)Math.random() * 200) - 100;
+            randomYrot[i] = ((float)Math.random() * 200) - 100;
+            randomZrot[i] = ((float)Math.random() * 200) - 100;
+        }
+    }
+
+
     public void doSwipe(MotionEvent ev, int which)
     {
         switch (ev.getAction() & MotionEvent.ACTION_MASK)
