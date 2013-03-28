@@ -40,7 +40,6 @@ import android.widget.CompoundButton.OnCheckedChangeListener;
 
 
 public class GraphicsActivity extends Activity {
-//    private static final String TAG = "Hans GLES"; /* Log tag */
     private GLView mView;
     private ToggleButton lighting, accel, anim;
     private RadioGroup group;

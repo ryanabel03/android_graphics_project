@@ -10,5 +10,5 @@
     <string name="moveball">Sphere</string>
     <string name="moveeye">Viewer</string>
     <string name="movecoa">LookAt</string>
-    <string name="dance">Dance</string>
+    <string name="movehand">Move Hand</string>
 </resources>

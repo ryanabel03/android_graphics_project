@@ -36,9 +36,9 @@
             android:layout_width="80dp"
             android:layout_height="wrap_content"
             android:checked="true"
-            android:text="@string/dance"
-            android:textOff="@string/dance"
-            android:textOn="@string/dance" />
+            android:text="@string/movehand"
+            android:textOff="@string/movehand"
+            android:textOn="@string/movehand" />
         <ScrollView
             android:id="@+id/scrollView1"
             android:layout_width="wrap_content"

@@ -22,6 +22,7 @@ public class GLRenderer implements Renderer {
     private Context mCtx;
     private boolean isLandscape, isPinching, lighting;
     private float[] sphRotation;
+    private float[] handCF;
     private float ratio;
     private TransformationParams param;
     private float prevX, prevY, prevDist;
@@ -61,9 +62,12 @@ public class GLRenderer implements Renderer {
         pin = new Pin(mCtx);
         hand = new Hand(mCtx);
         sphRotation = new float[16];
+        handCF = new float[16];
         /* initialize with identity matrix */
-        for (int k = 0; k < 16; k += 5)
+        for (int k = 0; k < 16; k += 5) {
         	sphRotation[k] = 1f;
+            handCF[k] = 1f;
+        }
 
         /* initialize transformation variables */
         param = p;
@@ -89,20 +93,7 @@ public class GLRenderer implements Renderer {
         gl.glLightfv(GL10.GL_LIGHT0, GL10.GL_POSITION, lightPos, 0);
         gl.glLightfv(GL10.GL_LIGHT0, GL10.GL_SPOT_DIRECTION, lightDir, 0);
         gl.glPopMatrix();
-        /* When both lighting and texture are used, the texture combination
-         * operation must set to something other than GL_REPLACE!!!
-         */
-        
-        /* specify what to do when a fragment is textured */
-        /* The following two lines are correct calls as per OpenGLES 
-         * document, but they do not work on the emulator */
-//        glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_COMBINE);
-//        glTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_RGB, GL_MODULATE);
 
-        /* The following line is not the correct call (per OpenGL ES doc),
-         * but it works on both emulator and real devices */
-//        gl.glTexEnvx(GL10.GL_TEXTURE_ENV, GL10.GL_TEXTURE_ENV_MODE, GL10.GL_MODULATE);
-//        gl.glDisableClientState(GL_NORMAL_ARRAY);
         if (lighting)
         	gl.glEnable(GL10.GL_LIGHTING);
         else
@@ -130,8 +121,6 @@ public class GLRenderer implements Renderer {
 		gl.glPopMatrix();
         
 		alley.unbind();
-        /* The Box class does not define color array, by disabling
-         * vertex color, the default color will be used to render it */
         
         ball.bind();
         gl.glDisableClientState(GL10.GL_COLOR_ARRAY);
@@ -219,29 +208,43 @@ public class GLRenderer implements Renderer {
 
         skin.bind();
         gl.glPushMatrix();
+        gl.glLoadMatrixf(handCF, 0);
+        if(movingHandForward) {
+            if(handPosY <= MAX_HAND_POS) {
+                if(anim) {
+                    handPosY += .005f;
+                    //handAngle -= .375f;
+                    gl.glMultMatrixf(MatrixHelper.getTranslationMatrix(0, .005f, 0), 0);
+                    gl.glMultMatrixf(MatrixHelper.getRotationMatrix(-.375f, 1, 0, 0), 0);
+                }
+                /*gl.glTranslatef( 0, handPosY, 0);
+                gl.glRotatef(handAngle, 1, 0, 0);*/
+            } else {
+                movingHandForward = false;
+            }
+        } else if (handPosY >= MIN_HAND_POS) {
+            if(anim){
+                handPosY -= .005f;
+                //handAngle += .375f;
+                gl.glMultMatrixf(MatrixHelper.getTranslationMatrix(0, -.005f, 0), 0);
+                gl.glMultMatrixf(MatrixHelper.getRotationMatrix(.375f, 1, 0, 0), 0);
+            }
+            //gl.glTranslatef(0, handPosY, 0);
+            //gl.glRotatef(handAngle, 1, 0, 0);
+        } else {
+            movingHandForward = true;
+        }
+
+        ((GL11) gl).glGetFloatv(GL11.GL_MODELVIEW_MATRIX, handCF, 0);
+        gl.glPopMatrix();
+
+        gl.glPushMatrix();
         gl.glTranslatef(-3f, 0f, 1.5f);
         gl.glRotatef(-90f, 0f, 0f, 1f);
         gl.glRotatef(180, 1f, 0f, 0f);
         gl.glScalef (4f, 4f, 4f);
 
-        if(movingHandForward) {
-            if(handPosY <= MAX_HAND_POS) {
-                handPosY += .005f;
-                handAngle -= .375f;
-                gl.glTranslatef( 0, handPosY, 0);
-                gl.glRotatef(handAngle, 1, 0, 0);
-            } else {
-                movingHandForward = false;
-            }
-        } else if (handPosY >= MIN_HAND_POS) {
-            handPosY -= .005f;
-            handAngle += .375f;
-            gl.glTranslatef(0, handPosY, 0);
-            gl.glRotatef(handAngle, 1, 0, 0);
-        } else {
-            movingHandForward = true;
-        }
-
+        gl.glMultMatrixf(handCF, 0);
         hand.draw();
         gl.glPopMatrix();
         skin.unbind();
@@ -372,7 +375,6 @@ public class GLRenderer implements Renderer {
 //        StringBuilder sb = new StringBuilder();
         switch (ev.getAction() & MotionEvent.ACTION_MASK) {
         case MotionEvent.ACTION_POINTER_DOWN:
-//            sb.append("POINTER DOWN");
             switch (which) {
             case R.id.movetex:
                 dx = (ev.getX(0) - ev.getX(1)) / scrWidth;
@@ -485,6 +487,7 @@ public class GLRenderer implements Renderer {
         tstamp = timestamp;
     	
     }
+
     void setLighting (boolean onOff)
     {
     	lighting = onOff;
